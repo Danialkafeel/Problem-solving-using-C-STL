@@ -22,6 +22,18 @@ node* buildTree(){
 	root->right = buildTree();
 	return root;
 }
+node* insertinBST(node* root,int val){
+	if(root == NULL){
+		node* n = new node(val);
+		return n;
+	}
+	if(root->data < val){
+		root->right = insertinBST(root->right,val);
+		return root;
+	}
+	root->left = insertinBST(root->left,val);
+	return root;
+}
 void printPre(node* root){
 	if(root == NULL)
 		return;

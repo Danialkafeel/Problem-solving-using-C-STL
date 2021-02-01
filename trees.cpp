@@ -162,7 +162,13 @@ bool isBST_topdown(node* root, int min = INT_MIN, int max = INT_MAX){
 		return true;
 	return false;
 }
-
+bool isStructurallyIdentical(node* r1, node * r2){
+	if(r1 == NULL and r2 == NULL)
+		return true;
+	if(r1 == NULL or r2 == NULL)
+		return false;
+	return isStructurallyIdentical(r1->left,r2->left) and isStructurallyIdentical(r1->right, r2->right);
+}
 
 int main(){
 	// int pre[] = {1,2,3,4,8,5,6,7};
@@ -170,9 +176,12 @@ int main(){
 	// node * root = treeFromIn_Pre(in,pre,0,7);
 	node* root = buildTree();
 	LvlOrder(root);
+	node* root2 = buildTree();
+	LvlOrder(root2);
+	cout<<isStructurallyIdentical(root,root2)<<endl;
 	cout<<"------------\n";
-	cout<<isBST_bottomup(root).isBST<<endl;
-	cout<<isBST_topdown(root)<<endl;
+	// cout<<isBST_bottomup(root).isBST<<endl;
+	// cout<<isBST_topdown(root)<<endl;
 
 	// int t = -1;
 	// rightView(root,t,0);

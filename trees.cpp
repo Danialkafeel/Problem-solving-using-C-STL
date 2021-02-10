@@ -182,35 +182,67 @@ bool isStructurallyIdentical(node* r1, node * r2){
 	return isStructurallyIdentical(r1->left,r2->left) and isStructurallyIdentical(r1->right, r2->right);
 }
 
-int main(){
-	// int pre[] = {1,2,3,4,8,5,6,7};
-	// int in[] = {3,2,8,4,1,6,7,5};
-	// node * root = treeFromIn_Pre(in,pre,0,7);
-	node* root = buildTree();
-	LvlOrder(root);
-	node* root2 = buildTree();
-	LvlOrder(root2);
-	cout<<isStructurallyIdentical(root,root2)<<endl;
-	cout<<"------------\n";
-	// cout<<isBST_bottomup(root).isBST<<endl;
-	// cout<<isBST_topdown(root)<<endl;
-
-	// int t = -1;
-	// rightView(root,t,0);
-	// SumReplacement(root);
-	// LvlOrder(root);
-	// cout<<isBalanced(root)<<endl;
-	// cout<<diameter(root)<<endl;
-	// printPre(root);
-	// cout<<endl;
-	// cout<<height(root);
+node* buildBalancedBST(node* root,int* arr,int l, int r){
+	if(l>r)
+		return NULL;
+	int mid = (l+r)/2;
+	root = new node(arr[mid]);
+	root->left = buildBalancedBST(root->left,arr,l,mid-1);
+	root->right = buildBalancedBST(root->right,arr,mid+1,r);
+	return root;
+}
+node* deleteTree(node* root){
+	if(root == NULL)
+		return NULL;
+	if(root->left == NULL and root->right == NULL){
+		delete root;
+		return NULL;
+	}
+	root->left = deleteTree(root->left);
+	root->right = deleteTree(root->right);
+	delete root;
+	return NULL;
+}
+void printNodesInaRange_BST(node* root,int a, int b){
+	if(root == NULL)
+		return;
+	printNodesInaRange_BST(root->left,a,b);
+	if(root->data >=a and root->data <=b)
+		cout<<root->data<<" ";
+	printNodesInaRange_BST(root->right,a,b);
+}
+int main() {
+	int t;
+	cin>>t;
+	while(t--){
+		node* bst = NULL;
+		int n;
+		cin>>n;
+		int arr[n];
+		for(int i=0;i<n;i++){
+			cin>>arr[i];
+			bst = insertinBST(bst,arr[i]);
+		}
+		cout<<"# Preorder : ";
+		printPre(bst);
+		cout<<endl;
+		int a,b;
+		cin>>a>>b;
+		cout<<"# Nodes within range are : ";
+		printNodesInaRange_BST(bst,a,b);
+		bst = deleteTree(bst);
+		cout<<endl;
+	}
 	return 0;
 }
-
 
 /*
 
 8 10 1 -1 -1 6 9 -1 -1 7 -1 -1 3 -1 14 13 -1 -1 -1
 1 2 4 -1 -1 5 -1 -1 3 6 -1 -1 7 -1 -1
 
+
+5    
+1 2 3 4 5
+3 1 2 4 5
 */

@@ -1,6 +1,8 @@
-#include<iostream>
-#include<queue>
+#include <iostream>
+#include <map>
+#include <queue>
 #include <climits>
+#include <string.h>
 using namespace std;
 class node
 {
@@ -40,6 +42,20 @@ void printPre(node* root){
 	cout<<root->data<<" ";
 	printPre(root->left);
 	printPre(root->right);
+}
+void bottom_view_util(node* root,int pos,map<int,int> &mp){
+	if(root == NULL)
+		return;
+	mp[pos] = root->data;
+	bottom_view_util(root->left,pos-1,mp);
+	bottom_view_util(root->right,pos+1,mp);
+}
+void bottom_view(node* root){
+	map<int,int> mp;
+	bottom_view_util(root,0,mp);
+	for(auto itr:mp)
+		cout<<itr.second<<" ";
+	cout<<endl;
 }
 
 int height(node* root){
@@ -211,28 +227,31 @@ void printNodesInaRange_BST(node* root,int a, int b){
 		cout<<root->data<<" ";
 	printNodesInaRange_BST(root->right,a,b);
 }
+node* buildTree_from_lvlTraversal(int* arr, int ind = 1){
+	cout<<"ind = "<<ind<<"\n";
+	cout<<arr[ind]<<endl;
+	if(arr[ind] == -1)
+		return NULL;
+	node* root = new node(arr[ind]);
+	root->left = buildTree_from_lvlTraversal(arr, 2*ind);
+	root->right = buildTree_from_lvlTraversal(arr, 2*ind+1);
+	return root;
+}
+int arr[10000002];
 int main() {
-	int t;
-	cin>>t;
-	while(t--){
-		node* bst = NULL;
-		int n;
-		cin>>n;
-		int arr[n];
-		for(int i=0;i<n;i++){
-			cin>>arr[i];
-			bst = insertinBST(bst,arr[i]);
-		}
-		cout<<"# Preorder : ";
-		printPre(bst);
-		cout<<endl;
-		int a,b;
-		cin>>a>>b;
-		cout<<"# Nodes within range are : ";
-		printNodesInaRange_BST(bst,a,b);
-		bst = deleteTree(bst);
-		cout<<endl;
+	int i=1;
+	string line;
+	getline(cin,line);
+	cout<<line.size()<<" "<<line[line.size()-1]<<endl;
+	char* ptr = strtok((char*)line.c_str()," ");
+	while(ptr != NULL){
+		arr[i++] = stoi((string)ptr);
+		ptr = strtok(NULL," ");
 	}
+	node * root = buildTree_from_lvlTraversal(arr);
+	printPre(root);
+	cout<<endl;
+	bottom_view(root);
 	return 0;
 }
 

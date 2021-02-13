@@ -24,6 +24,29 @@ node* buildTree(){
 	root->right = buildTree();
 	return root;
 }
+node *build(string s)
+{
+    if (s == "true")
+    {
+        int d;
+        cin >> d;
+        node *root = new node(d);
+        string l;
+        cin >> l;
+        if (l == "true")
+        {
+            root->left = build(l);
+        }
+        string r;
+        cin >> r;
+        if (r == "true")
+        {
+            root->right = build(r);
+        }
+        return root;
+    }
+    return NULL;
+}
 node* insertinBST(node* root,int val){
 	if(root == NULL){
 		node* n = new node(val);
@@ -237,31 +260,15 @@ node* buildTree_from_lvlTraversal(int* arr, int ind = 1){
 	root->right = buildTree_from_lvlTraversal(arr, 2*ind+1);
 	return root;
 }
-int arr[10000002];
+void printZigZigLvlOrder(node* root){
+	
+}
 int main() {
-	int i=1;
-	string line;
-	getline(cin,line);
-	cout<<line.size()<<" "<<line[line.size()-1]<<endl;
-	char* ptr = strtok((char*)line.c_str()," ");
-	while(ptr != NULL){
-		arr[i++] = stoi((string)ptr);
-		ptr = strtok(NULL," ");
-	}
-	node * root = buildTree_from_lvlTraversal(arr);
-	printPre(root);
-	cout<<endl;
-	bottom_view(root);
+	node* root = build("true");
+	// printZigZigLvlOrder(root);
+	if(isBalanced(root))
+		cout<<"true\n";
+	else
+		cout<<"false\n";
 	return 0;
 }
-
-/*
-
-8 10 1 -1 -1 6 9 -1 -1 7 -1 -1 3 -1 14 13 -1 -1 -1
-1 2 4 -1 -1 5 -1 -1 3 6 -1 -1 7 -1 -1
-
-
-5    
-1 2 3 4 5
-3 1 2 4 5
-*/

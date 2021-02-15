@@ -3,6 +3,7 @@
 #include <queue>
 #include <climits>
 #include <string.h>
+#include <algorithm>
 using namespace std;
 class node
 {
@@ -221,13 +222,13 @@ bool isStructurallyIdentical(node* r1, node * r2){
 	return isStructurallyIdentical(r1->left,r2->left) and isStructurallyIdentical(r1->right, r2->right);
 }
 
-node* buildBalancedBST(node* root,int* arr,int l, int r){
+node* buildBSTfromSortedArray(int* arr,int l, int r){
 	if(l>r)
 		return NULL;
 	int mid = (l+r)/2;
-	root = new node(arr[mid]);
-	root->left = buildBalancedBST(root->left,arr,l,mid-1);
-	root->right = buildBalancedBST(root->right,arr,mid+1,r);
+	node* root = new node(arr[mid]);
+	root->left = buildBSTfromSortedArray(arr,l,mid-1);
+	root->right = buildBSTfromSortedArray(arr,mid+1,r);
 	return root;
 }
 node* deleteTree(node* root){
@@ -261,14 +262,93 @@ node* buildTree_from_lvlTraversal(int* arr, int ind = 1){
 	return root;
 }
 void printZigZigLvlOrder(node* root){
-	
+	if(root == NULL)
+		return;
+	queue<pair<node*,int>> q;
+	q.push({root,0});
+	int curr_lvl = 0;
+	vector<int> arr;
+	while(!q.empty()){
+		auto top = q.front();
+		if(curr_lvl != top.second){
+			if(curr_lvl%2 == 1)
+				reverse(arr.begin(),arr.end());
+			for(int i:arr)
+				cout<<i<<" ";
+			cout<<endl;
+			arr.clear();
+			curr_lvl = top.second;
+		}
+		// cout<<top.first->data<<" ";
+		arr.push_back(top.first->data);
+		q.pop();
+		if(top.first->left != NULL)
+			q.push({top.first->left,top.second+1});
+		if(top.first->right != NULL)
+			q.push({top.first->right,top.second+1});
+	}
+	if(curr_lvl%2 == 1)
+		reverse(arr.begin(),arr.end());
+	for(int i:arr)
+		cout<<i<<" ";
+	cout<<endl;
 }
-int main() {
-	node* root = build("true");
-	// printZigZigLvlOrder(root);
-	if(isBalanced(root))
-		cout<<"true\n";
+void printPreModified(node * root){
+	if(root == NULL)
+		return;
+	if(root->left == NULL)
+		cout<<"END => ";
 	else
-		cout<<"false\n";
+		cout<<root->left->data<<" => ";
+	cout<<root->data<<" ";
+
+	if(root->right == NULL)
+		cout<<"<= END";
+	else
+		cout<<"<= "<<root->right->data;
+	cout<<endl;
+	printPreModified(root->left);
+	printPreModified(root->right);
+}
+
+int replace_with_sum_of_greater_nodes(node * root){
+	if(root == NULL)
+		return 0;
+	int leftSum = replace_with_sum_of_greater_nodes(root->left);
+	int rightSum = replace_with_sum_of_greater_nodes(root->right);
+	root->data += rightSum;
+	return root->data + leftSum;
+}
+
+int main() {
+	// node* root = build("true");
+	// printZigZigLvlOrder(root);
+	// if(isBalanced(root))
+	// 	cout<<"true\n";
+	// else
+	// 	cout<<"false\n";
+
+	int n;
+	cin>>n;
+	int pre[n], in[n];
+	for(int i=0;i<n;i++)
+		cin>>pre[i];
+	cin>>n;
+	for(int i=0;i<n;i++)
+		cin>>in[i];
+	node* root = treeFromIn_Pre(in,pre,0,n-1);
+	printPreModified(root);
+
+
+	// int n;
+	// cin>>n;
+	// int arr[n];
+	// for(int i=0;i<n;i++)
+	// 	cin>>arr[i];
+	// node * bstRoot = buildBSTfromSortedArray(arr,0,n-1);
+	// replace_with_sum_of_greater_nodes(bstRoot);
+	// printPre(bstRoot);
+
 	return 0;
 }
+// 1 true 2 true 4 false false true 5 false false true 3 true 6 false false true 7 false false

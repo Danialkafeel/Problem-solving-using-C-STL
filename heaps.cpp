@@ -1,5 +1,7 @@
 #include <iostream>
 #include <queue>
+#include <set>
+#include <stack>
 #define ll long long
 using namespace std;
 void kthMinimum(){
@@ -46,11 +48,56 @@ void k_mostFrequent_running_stream(){
 	int t,n,k;
 	cin>>t;
 	while(t--){
-		cin>>n>>k;
+			
+	}
+}
+void median_in_a_stream(){
+	int t,n;
+	cin>>t;
+	while(t--){
+		cin>>n;
 		int arr[n];
-		for(int i=0;i<n;i++)
+		priority_queue<int> left_heap;
+		priority_queue<int,vector<int>, greater<int>> right_heap;
+		cin>>arr[0];
+		int median = arr[0];
+		cout<<median<<" ";
+		left_heap.push(arr[0]);
+		for (int i = 1; i < n; ++i){
 			cin>>arr[i];
-		
+			if(arr[i] < median){
+				if(left_heap.size() > right_heap.size()){
+					right_heap.push(left_heap.top());
+					left_heap.pop();
+					left_heap.push(arr[i]);
+					median = 1.0*(left_heap.top()+right_heap.top())/2;
+				}
+				else{
+					left_heap.push(arr[i]);
+					if(left_heap.size() == right_heap.size())
+						median = 1.0*(left_heap.top()+right_heap.top())/2;
+					else
+						median = left_heap.top();
+				}
+			}
+			else{
+				if(left_heap.size() < right_heap.size()){
+					left_heap.push(right_heap.top());
+					right_heap.pop();
+					right_heap.push(arr[i]);
+					median = 1.0*(left_heap.top()+right_heap.top())/2;
+				}
+				else{
+					right_heap.push(arr[i]);
+					if(left_heap.size() == right_heap.size())
+						median = 1.0*(left_heap.top()+right_heap.top())/2;
+					else
+						median = right_heap.top();
+				}
+			}
+			cout<<median<<" ";
+		}
+		cout<<"\n";
 	}
 }
 int main(){
@@ -68,6 +115,7 @@ int main(){
 	// 	cout<<vv<<" ";
 	// cout<<endl;
 
-	k_mostFrequent_running_stream();
+	// k_mostFrequent_running_stream();
+	median_in_a_stream();
 	return 0;
 }

@@ -60,6 +60,41 @@ node* insertinBST(node* root,int val){
 	root->left = insertinBST(root->left,val);
 	return root;
 }
+node* deleteInBST(node* root,int val){
+	if(root == NULL)
+		return NULL;
+	if(root->data < val){
+		root->right = deleteInBST(root->right,val);
+		return root;
+	}
+	if(root->data > val){
+		root->left = deleteInBST(root->left,val);
+		return root;
+	}
+	// root->data == val
+	if(root->left == NULL and root->right == NULL){
+		delete root;
+		return NULL;
+	}
+	if(root->left == NULL){
+		node* temp = root->right;
+		delete root;
+		return temp;
+	}
+	if(root->right == NULL){
+		node* temp = root->left;
+		delete root;
+		return temp;
+	}
+	// Both children
+	node* inorder_succ = root->right;
+	while(inorder_succ->left != NULL){
+		inorder_succ = inorder_succ->left;
+	}
+	root->data = inorder_succ->data;
+	root->right = deleteInBST(root->right,inorder_succ->data);
+	return root;
+}
 void printPre(node* root){
 	if(root == NULL)
 		return;
@@ -311,13 +346,13 @@ void printPreModified(node * root){
 	printPreModified(root->right);
 }
 
-int replace_with_sum_of_greater_nodes(node * root){
+void replace_with_sum_of_greater_nodes(node * root, int &sum){
 	if(root == NULL)
-		return 0;
-	int leftSum = replace_with_sum_of_greater_nodes(root->left);
-	int rightSum = replace_with_sum_of_greater_nodes(root->right);
-	root->data += rightSum;
-	return root->data + leftSum;
+		return;
+	replace_with_sum_of_greater_nodes(root->right,sum);
+	sum += root->data;
+	root->data = sum;
+	replace_with_sum_of_greater_nodes(root->left,sum);
 }
 
 int main() {
@@ -328,16 +363,16 @@ int main() {
 	// else
 	// 	cout<<"false\n";
 
-	int n;
-	cin>>n;
-	int pre[n], in[n];
-	for(int i=0;i<n;i++)
-		cin>>pre[i];
-	cin>>n;
-	for(int i=0;i<n;i++)
-		cin>>in[i];
-	node* root = treeFromIn_Pre(in,pre,0,n-1);
-	printPreModified(root);
+	// int n;
+	// cin>>n;
+	// int pre[n], in[n];
+	// for(int i=0;i<n;i++)
+	// 	cin>>pre[i];
+	// cin>>n;
+	// for(int i=0;i<n;i++)
+	// 	cin>>in[i];
+	// node* root = treeFromIn_Pre(in,pre,0,n-1);
+	// printPreModified(root);
 
 
 	// int n;
@@ -346,8 +381,32 @@ int main() {
 	// for(int i=0;i<n;i++)
 	// 	cin>>arr[i];
 	// node * bstRoot = buildBSTfromSortedArray(arr,0,n-1);
-	// replace_with_sum_of_greater_nodes(bstRoot);
+	// int sum = 0;
+	// replace_with_sum_of_greater_nodes(bstRoot, sum);
 	// printPre(bstRoot);
+	// cout<<endl;
+
+	int t;
+	cin>>t;
+	while(t--){
+		int n,m;
+		node* bst = NULL;
+		cin>>n;
+		while(n--){
+			int data;
+			cin>>data;
+			bst = insertinBST(bst,data);
+		}
+		// printPre(bst);
+		cin>>m;
+		while(m--){
+			int data;
+			cin>>data;
+			bst = deleteInBST(bst,data);
+		}
+		printPre(bst);
+		cout<<endl;
+	}
 
 	return 0;
 }

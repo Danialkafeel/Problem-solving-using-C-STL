@@ -4,6 +4,7 @@
 #include <climits>
 #include <string.h>
 #include <algorithm>
+#include <sstream>
 using namespace std;
 class node
 {
@@ -106,12 +107,55 @@ void bottom_view_util(node* root,int pos,map<int,int> &mp){
 	if(root == NULL)
 		return;
 	mp[pos] = root->data;
+	// cout<<pos<<":"<<root->data<<endl;
 	bottom_view_util(root->left,pos-1,mp);
 	bottom_view_util(root->right,pos+1,mp);
 }
 void bottom_view(node* root){
 	map<int,int> mp;
 	bottom_view_util(root,0,mp);
+	for(auto itr:mp)
+		cout<<itr.second<<" ";
+	cout<<endl;
+}
+void top_view_util(node* root,int pos,map<int,int> &mp){
+	if(root == NULL)
+		return;
+	top_view_util(root->left,pos-1,mp);
+	top_view_util(root->right,pos+1,mp);
+	mp[pos] = root->data;
+}
+void top_view(node* root){
+	map<int,int> mp;
+	top_view_util(root,0,mp);
+	for(auto itr:mp)
+		cout<<itr.second<<" ";
+	cout<<endl;
+}
+void left_view_util(node* root,int depth, map<int,int> &mp){
+	if(root == NULL)
+		return;
+	mp[depth] = root->data;
+	left_view_util(root->right,depth+1,mp);
+	left_view_util(root->left,depth+1,mp);
+}
+void left_view(node* root){
+	map<int,int> mp;
+	left_view_util(root,0,mp);
+	for(auto itr:mp)
+		cout<<itr.second<<" ";
+	cout<<endl;
+}
+void right_view_util(node* root,int depth, map<int,int> &mp){
+	if(root == NULL)
+		return;
+	mp[depth] = root->data;
+	right_view_util(root->left,depth+1,mp);
+	right_view_util(root->right,depth+1,mp);
+}
+void right_view(node* root){
+	map<int,int> mp;
+	right_view_util(root,0,mp);
 	for(auto itr:mp)
 		cout<<itr.second<<" ";
 	cout<<endl;
@@ -286,14 +330,31 @@ void printNodesInaRange_BST(node* root,int a, int b){
 		cout<<root->data<<" ";
 	printNodesInaRange_BST(root->right,a,b);
 }
-node* buildTree_from_lvlTraversal(int* arr, int ind = 1){
-	cout<<"ind = "<<ind<<"\n";
-	cout<<arr[ind]<<endl;
-	if(arr[ind] == -1)
+node* buildTree_from_lvlTraversal(vector<int> arr){
+	if(arr[0] == -1)
 		return NULL;
-	node* root = new node(arr[ind]);
-	root->left = buildTree_from_lvlTraversal(arr, 2*ind);
-	root->right = buildTree_from_lvlTraversal(arr, 2*ind+1);
+	int n = arr.size();
+	queue<node*> nodeq;
+	node* root = new node(arr[0]);
+	nodeq.push(root);
+	for(int i=1;i<n-1;i+=2){
+		node* curr = nodeq.front();
+		nodeq.pop();
+		if(arr[i] == -1){
+			curr->left = NULL;
+		}
+		else{
+			curr->left = new node(arr[i]);
+			nodeq.push(curr->left);
+		}
+		if(arr[i+1] == -1){
+			curr->right = NULL;
+		}
+		else{
+			curr->right = new node(arr[i+1]);
+			nodeq.push(curr->right);
+		}
+	}
 	return root;
 }
 void printZigZigLvlOrder(node* root){
@@ -354,6 +415,54 @@ void replace_with_sum_of_greater_nodes(node * root, int &sum){
 	root->data = sum;
 	replace_with_sum_of_greater_nodes(root->left,sum);
 }
+class pair_BST{
+public:
+	int min,max, count;
+	bool isBST;
+	pair_BST(){
+		isBST = true;
+		min = INT_MAX;
+		max = INT_MIN;
+		count = 0;
+	}
+	void print(){
+		cout<<min<<" "<<max<<" "<<isBST<<endl;
+	}
+};
+pair_BST largestBST(node* root){
+	pair_BST p;
+	if(root == NULL)
+		return p;
+	pair_BST leftans = largestBST(root->left);
+	pair_BST rightans = largestBST(root->right);
+	if(leftans.isBST and rightans.isBST and root->data > leftans.max and root->data < rightans.min){
+		p.count = rightans.count+leftans.count+1;
+		p.isBST = true;
+		p.max = max(root->data,max(leftans.max,rightans.max));
+		p.min = min(root->data,min(leftans.min,rightans.min));
+		return p;
+	}
+	p.count = max(leftans.count, rightans.count);
+	p.isBST = false;
+	return p;
+}
+
+int count_nodes(node* root){
+	if(root == NULL)
+		return 0;
+	return count_nodes(root->left) + count_nodes(root->right) + 1;
+}
+
+void largestBST_bruteforce(node* root, int &ans){
+	if(root == NULL)
+		return;
+	if(isBST_topdown(root)){
+		ans = max(ans,count_nodes(root));
+		return;
+	}
+	largestBST_bruteforce(root->left,ans);
+	largestBST_bruteforce(root->right,ans);
+}
 
 int main() {
 	// node* root = build("true");
@@ -363,17 +472,18 @@ int main() {
 	// else
 	// 	cout<<"false\n";
 
-	// int n;
-	// cin>>n;
-	// int pre[n], in[n];
-	// for(int i=0;i<n;i++)
-	// 	cin>>pre[i];
-	// cin>>n;
-	// for(int i=0;i<n;i++)
-	// 	cin>>in[i];
-	// node* root = treeFromIn_Pre(in,pre,0,n-1);
-	// printPreModified(root);
-
+	int n;
+	cin>>n;
+	int pre[n], in[n];
+	for(int i=0;i<n;i++)
+		cin>>pre[i];
+	for(int i=0;i<n;i++)
+		cin>>in[i];
+	node* root = treeFromIn_Pre(in,pre,0,n-1);
+	// int ans = 0;
+	// largestBST_bruteforce(root,ans);
+	// cout<<ans<<endl;
+	cout<<largestBST(root).count<<endl;
 
 	// int n;
 	// cin>>n;
@@ -386,28 +496,42 @@ int main() {
 	// printPre(bstRoot);
 	// cout<<endl;
 
-	int t;
-	cin>>t;
-	while(t--){
-		int n,m;
-		node* bst = NULL;
-		cin>>n;
-		while(n--){
-			int data;
-			cin>>data;
-			bst = insertinBST(bst,data);
-		}
-		// printPre(bst);
-		cin>>m;
-		while(m--){
-			int data;
-			cin>>data;
-			bst = deleteInBST(bst,data);
-		}
-		printPre(bst);
-		cout<<endl;
-	}
+	// int t;
+	// cin>>t;
+	// while(t--){
+	// 	int n,m;
+	// 	node* bst = NULL;
+	// 	cin>>n;
+	// 	while(n--){
+	// 		int data;
+	// 		cin>>data;
+	// 		bst = insertinBST(bst,data);
+	// 	}
+	// 	// printPre(bst);
+	// 	cin>>m;
+	// 	while(m--){
+	// 		int data;
+	// 		cin>>data;
+	// 		bst = deleteInBST(bst,data);
+	// 	}
+	// 	printPre(bst);
+	// 	cout<<endl;
+	// }
 
+	// string line,inp;
+	// getline(cin,line);
+	// stringstream X(line);
+	// vector<int> arr;
+	// while (getline(X, inp, ' ')) { 
+ //        arr.push_back(stoi(inp));
+ //    }
+ //    node* root = buildTree_from_lvlTraversal(arr);
+    // LvlOrder(root);
+    // printPre(root);
+    // cout<<"\n========================\n";
+    // bottom_view(root);
+    // top_view(root);
+    // left_view(root);
+    // right_view(root);
 	return 0;
 }
-// 1 true 2 true 4 false false true 5 false false true 3 true 6 false false true 7 false false

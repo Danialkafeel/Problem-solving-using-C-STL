@@ -103,33 +103,38 @@ void printPre(node* root){
 	printPre(root->left);
 	printPre(root->right);
 }
-void bottom_view_util(node* root,int pos,map<int,int> &mp){
+void bottom_view_util(node* root,int pos,int depth, map<int,pair<int,int>> &mp){
 	if(root == NULL)
 		return;
-	mp[pos] = root->data;
-	// cout<<pos<<":"<<root->data<<endl;
-	bottom_view_util(root->left,pos-1,mp);
-	bottom_view_util(root->right,pos+1,mp);
+	if(mp.count(pos) == 0)
+		mp[pos] = make_pair(depth,root->data);
+	else if(mp[pos].first <= depth)
+		mp[pos] = make_pair(depth,root->data);
+	bottom_view_util(root->left,pos-1,depth+1,mp);
+	bottom_view_util(root->right,pos+1,depth+1,mp);
 }
 void bottom_view(node* root){
-	map<int,int> mp;
-	bottom_view_util(root,0,mp);
+	map<int,pair<int,int>> mp;
+	bottom_view_util(root,0,0,mp);
 	for(auto itr:mp)
-		cout<<itr.second<<" ";
+		cout<<itr.second.second<<" ";
 	cout<<endl;
 }
-void top_view_util(node* root,int pos,map<int,int> &mp){
+void top_view_util(node* root,int pos,int depth, map<int,pair<int,int>> &mp){
 	if(root == NULL)
 		return;
-	top_view_util(root->left,pos-1,mp);
-	top_view_util(root->right,pos+1,mp);
-	mp[pos] = root->data;
+	if(mp.count(pos) == 0)
+		mp[pos] = make_pair(depth,root->data);
+	else if(mp[pos].first > depth)
+		mp[pos] = make_pair(depth,root->data);
+	top_view_util(root->left,pos-1,depth+1,mp);
+	top_view_util(root->right,pos+1,depth+1,mp);
 }
 void top_view(node* root){
-	map<int,int> mp;
-	top_view_util(root,0,mp);
+	map<int,pair<int,int>> mp;
+	top_view_util(root,0,0,mp);
 	for(auto itr:mp)
-		cout<<itr.second<<" ";
+		cout<<itr.second.second<<" ";
 	cout<<endl;
 }
 void left_view_util(node* root,int depth, map<int,int> &mp){
@@ -464,6 +469,59 @@ void largestBST_bruteforce(node* root, int &ans){
 	largestBST_bruteforce(root->right,ans);
 }
 
+void print_subTree_at_dist_k(node* root,int k){
+	if(root == NULL or k < 0)
+		return;
+	if(k == 0){
+		cout<<root->data<<" ";
+		return;
+	}
+	print_subTree_at_dist_k(root->left,k-1);
+	print_subTree_at_dist_k(root->right,k-1);
+}
+
+int print_all_nodes_at_distance_k(node* root, int key, int k){
+	if(root == NULL)
+		return -1;
+	if(root->data == key){
+		print_subTree_at_dist_k(root,k);
+		return 0;
+	}
+	int leftans = print_all_nodes_at_distance_k(root->left,key,k);
+	if(leftans != -1){
+		if(k-leftans == 1)
+			cout<<root->data<<" ";
+		else
+			print_subTree_at_dist_k(root->right,k-leftans-2);
+		return leftans+1;
+	}
+	int rightans = print_all_nodes_at_distance_k(root->right,key,k);
+	if(rightans != -1){
+		if(k-rightans == 1)
+			cout<<root->data<<" ";
+		else
+			print_subTree_at_dist_k(root->left,k-rightans-2);
+		return rightans+1;
+	}
+	return -1;
+}
+void vertical_order_util(node* root, map<int,vector<int>>&mp, int pos=0){
+	if(root == NULL)
+		return;
+	mp[pos].push_back(root->data);
+	vertical_order_util(root->left,mp,pos-1);
+	vertical_order_util(root->right,mp,pos+1);
+}
+void vertical_order(node* root){
+	map<int,vector<int>> mp;
+	vertical_order_util(root,mp);
+	for(auto pp:mp){
+		for(auto ppp:pp.second)
+			cout<<ppp<<" ";
+		cout<<endl;
+	}
+}
+
 int main() {
 	// node* root = build("true");
 	// printZigZigLvlOrder(root);
@@ -472,19 +530,25 @@ int main() {
 	// else
 	// 	cout<<"false\n";
 
-	int n;
-	cin>>n;
-	int pre[n], in[n];
-	for(int i=0;i<n;i++)
-		cin>>pre[i];
-	for(int i=0;i<n;i++)
-		cin>>in[i];
-	node* root = treeFromIn_Pre(in,pre,0,n-1);
-	// int ans = 0;
-	// largestBST_bruteforce(root,ans);
-	// cout<<ans<<endl;
-	cout<<largestBST(root).count<<endl;
-
+	// int n;
+	// cin>>n;
+	// int pre[n], in[n];
+	// for(int i=0;i<n;i++)
+	// 	cin>>pre[i];
+	// for(int i=0;i<n;i++)
+	// 	cin>>in[i];
+	// node* root = treeFromIn_Pre(in,pre,0,n-1);
+ //    LvlOrder(root);
+ //    printPre(root);
+ //    cout<<"\n========================\n";
+	// int t;
+	// cin>>t;
+	// while(t--){
+	// 	int key,k;
+	// 	cin>>key>>k;
+	// 	print_all_nodes_at_distance_k(root,key,k);
+	// 	cout<<endl;
+	// }
 	// int n;
 	// cin>>n;
 	// int arr[n];
@@ -518,17 +582,16 @@ int main() {
 	// 	cout<<endl;
 	// }
 
-	// string line,inp;
-	// getline(cin,line);
-	// stringstream X(line);
-	// vector<int> arr;
-	// while (getline(X, inp, ' ')) { 
- //        arr.push_back(stoi(inp));
- //    }
- //    node* root = buildTree_from_lvlTraversal(arr);
-    // LvlOrder(root);
+	string line,inp;
+	getline(cin,line);
+	stringstream X(line);
+	vector<int> arr;
+	while (getline(X, inp, ' ')) { 
+        arr.push_back(stoi(inp));
+    }
+    node* root = buildTree_from_lvlTraversal(arr);
     // printPre(root);
-    // cout<<"\n========================\n";
+    vertical_order(root);
     // bottom_view(root);
     // top_view(root);
     // left_view(root);

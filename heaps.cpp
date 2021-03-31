@@ -115,7 +115,7 @@ int main(){
 	// 	cout<<vv<<" ";
 	// cout<<endl;
 
-	// k_mostFrequent_running_stream();
-	median_in_a_stream();
+	k_mostFrequent_running_stream();
+	// median_in_a_stream();
 	return 0;
 }

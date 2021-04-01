@@ -1,7 +1,4 @@
-#include <iostream>
-#include <queue>
-#include <set>
-#include <stack>
+#include <bits/stdc++.h>
 #define ll long long
 using namespace std;
 void kthMinimum(){
@@ -48,7 +45,30 @@ void k_mostFrequent_running_stream(){
 	int t,n,k;
 	cin>>t;
 	while(t--){
-			
+		int n,k;
+		cin>>n>>k;
+		int a;
+		unordered_map<int,int> mp;
+		int arr[k+1] = {0};
+		while(n--){
+			cin>>a;
+			mp[a]++;
+			int ind = find(arr,arr+k,a) - arr;
+			arr[ind] = a;
+			int i=ind;
+			while(i>0 and mp[arr[i-1]] < mp[arr[i]]){
+				swap(arr[i],arr[i-1]);
+				i--;
+			}
+			while(i>0 and mp[arr[i-1]] == mp[arr[i]] and arr[i-1] > arr[i]){
+				swap(arr[i],arr[i-1]);
+				i--;
+			}
+			for(int i=0;i<k and arr[i]!=0;i++){
+				cout<<arr[i]<<" ";
+			}
+		}
+		cout<<endl;
 	}
 }
 void median_in_a_stream(){

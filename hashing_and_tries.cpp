@@ -40,49 +40,100 @@ string minimum_length_substring(string s1, string s2){
 ll subarrays_with_distinct_elements(ll* arr, ll n){
 	ll mod = 1000000007, ans = 0;
 	ll l,r;
-	l = r = 0;
+	r = 1;
 	unordered_map<ll,int> mp;
-	for(;r<n;r++){
-		if(mp.find(arr[r]) == mp.end() or mp[arr[r]] == 0){
-			cout<<"Inserting "<<arr[r]<<endl;
-			mp[arr[r]] = 1;
-		}
-		else{
-			ll len = r-l;
-			cout<<"l,r = "<<l<<" "<<r<<endl;
-			ll temp = (len * (len+1))%mod;
-			temp = temp/2;
-			// cout<<"temp = "<<temp<<endl;
-			ans = (ans + temp)%mod;
-			mp[arr[l]]--;
-			l++;
+	mp[arr[0]]++;
+	for(l=0;l<n;l++){
+		while(r<n and (mp.find(arr[r]) == mp.end() or mp[arr[r]]==0)){
 			mp[arr[r]]++;
+			r++;
 		}
-	}
-	cout<<"yo\n";
-	for(;l<n;l++){
-		ll len = n - l;
-		cout<<"len = "<<len<<endl;
-		ll temp = (len * (len+1))%mod;
-		temp = temp/2;
-		// cout<<"temp = "<<temp<<endl;
-		ans = (ans + temp)%mod;
+		ll window = r-l;
+		ans += ((window*(window+1))/2)%mod;
+		mp[arr[l]]--;
 	}
 	return ans;
 }
+
+class node_trie
+{
+public:
+	bool terminal;
+	char data;
+	map<char,node_trie*> children;
+	node_trie(char d):data(d){
+		terminal = false;
+	}
+};
+
+void insert_in_trie(node_trie *root, string str, int n){
+	if(n == 0){
+		return;
+	}
+	node_trie* temp = root;
+	for(int i=0;i<n;i++){
+		if(temp->children.count(str[i])){
+			temp = temp->children[str[i]];
+		}
+		else{
+			temp->children[str[i]] = new node_trie(str[i]);
+			temp = temp->children[str[i]];
+		}
+	}
+	temp->terminal = true;
+}
+
+node_trie* last_matching_node_in_trie(node_trie* root, string str){
+	node_trie* tt = NULL;
+	if(str.size() == 0){
+		return (tt);
+	}
+	node_trie* temp = root;
+	for(int i=0;i<str.size();i++){
+		if(temp->children.count(str[i])){
+			temp = temp->children[str[i]];
+		}
+		else{
+			return (tt);
+		}
+	}
+	return temp;
+}
+void preorder_in_trie(string s, node_trie* root){
+	if(root == NULL)
+		return;
+	if(root->terminal)
+		cout<<s+root->data<<endl;
+	for(auto p: root->children){
+		preorder_in_trie(s+root->data, p.second);
+	}
+}
+
+void dictionary(int n){
+	node_trie* root = new node_trie('\0');
+	for(int i=0;i<n;i++){
+		string str;
+		cin>>str;
+		insert_in_trie(root,str,str.size());
+	}
+	int q;
+	cin>>q;
+	while(q--){
+		string str;
+		cin>>str;
+		node_trie* last_matching_node = last_matching_node_in_trie(root,str);
+		if(last_matching_node == NULL){
+			cout<<"No suggestions\n";
+			insert_in_trie(root, str, str.size());
+		}
+		else
+			preorder_in_trie(str.substr(0,str.size()-1),last_matching_node);
+	}
+}
+
 int main() {
-	// string s1, s2;
-	// getline(cin,s1);
-	// getline(cin,s2);
-	// string ans = minimum_length_substring(s1,s2);
-	// if(ans != "-1"){
-	// 	cout<<ans<<endl;
-	// }
-	ll n;
+	int n;
 	cin>>n;
-	ll arr[n];
-	for(ll i=0;i<n;i++)
-		cin>>arr[i];
-	cout<<subarrays_with_distinct_elements(arr,n)<<endl;
+	dictionary(n);
 	return 0;
 }
